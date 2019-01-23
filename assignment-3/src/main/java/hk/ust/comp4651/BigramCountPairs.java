@@ -2,6 +2,7 @@ package hk.ust.comp4651;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -43,7 +44,7 @@ public class BigramCountPairs extends Configured implements Tool {
 		// Reuse objects to save overhead of object creation.
 		private static final IntWritable ONE = new IntWritable(1);
 		private static final PairOfStrings BIGRAM = new PairOfStrings();
-//		private static final String tempRightElement = new String();
+		private static String tempRightElement = new String();
 		
 		@Override
 		public void map(LongWritable key, Text value, Context context)
@@ -54,13 +55,11 @@ public class BigramCountPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here
 			 */
-			
 			for (int i = 0; i < words.length; i++) {
 				// skip empty words
 				if (words[i].length() == 0)
 					continue;
 				
-				String tempRightELement = null;
 				for (int j = i + 1; j < words.length; j++) {
 					// skip empty words
 					if (words[j].length() == 0)
@@ -75,15 +74,13 @@ public class BigramCountPairs extends Configured implements Tool {
 				if (tempRightElement == null)
 					continue;
 				
-				//both words found
+				//both words found and valid
 				BIGRAM.set(words[i], tempRightElement);
 				context.write(BIGRAM, ONE);
-				tempRightElement = "";
-				
+				tempRightElement = null;
 				}
 			}
 		}
-	}
 
 	/*
 	 * Reducer: aggregate bigram counts
@@ -101,7 +98,14 @@ public class BigramCountPairs extends Configured implements Tool {
 			 * TODO: Your implementation goes here. The output must be a
 			 * sequence of key-value pairs of <bigram, count>
 			 */
-		}
+			Iterator<IntWritable> iter = values.iterator();
+			int sum = 0;
+			while (iter.hasNext()) 
+				sum += iter.next().get();
+			
+			SUM.set(sum);
+			context.write(key, SUM);
+			}
 	}
 
 	/*
