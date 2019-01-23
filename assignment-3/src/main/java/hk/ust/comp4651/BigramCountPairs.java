@@ -43,7 +43,8 @@ public class BigramCountPairs extends Configured implements Tool {
 		// Reuse objects to save overhead of object creation.
 		private static final IntWritable ONE = new IntWritable(1);
 		private static final PairOfStrings BIGRAM = new PairOfStrings();
-
+//		private static final String tempRightElement = new String();
+		
 		@Override
 		public void map(LongWritable key, Text value, Context context)
 				throws IOException, InterruptedException {
@@ -53,6 +54,34 @@ public class BigramCountPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here
 			 */
+			
+			for (int i = 0; i < words.length; i++) {
+				// skip empty words
+				if (words[i].length() == 0)
+					continue;
+				
+				String tempRightELement = null;
+				for (int j = i + 1; j < words.length; j++) {
+					// skip empty words
+					if (words[j].length() == 0)
+						continue;
+					else {
+						tempRightElement = words[j];
+						break;
+					}
+				}
+				
+				//last word case
+				if (tempRightElement == null)
+					continue;
+				
+				//both words found
+				BIGRAM.set(words[i], tempRightElement);
+				context.write(BIGRAM, ONE);
+				tempRightElement = "";
+				
+				}
+			}
 		}
 	}
 
