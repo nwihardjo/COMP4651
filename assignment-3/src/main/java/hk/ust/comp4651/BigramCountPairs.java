@@ -44,7 +44,6 @@ public class BigramCountPairs extends Configured implements Tool {
 		// Reuse objects to save overhead of object creation.
 		private static final IntWritable ONE = new IntWritable(1);
 		private static final PairOfStrings BIGRAM = new PairOfStrings();
-		private static String tempRightElement = new String();
 		
 		@Override
 		public void map(LongWritable key, Text value, Context context)
@@ -60,25 +59,18 @@ public class BigramCountPairs extends Configured implements Tool {
 				if (words[i].length() == 0)
 					continue;
 				
+				// loop to find the adjacent word
 				for (int j = i + 1; j < words.length; j++) {
 					// skip empty words
 					if (words[j].length() == 0)
 						continue;
 					else {
-						tempRightElement = words[j];
+						BIGRAM.set(words[i], words[j]);
+						context.write(BIGRAM, ONE);
 						break;
 					}
 				}
-				
-				//last word case
-				if (tempRightElement == null)
-					continue;
-				
-				//both words found and valid
-				BIGRAM.set(words[i], tempRightElement);
-				context.write(BIGRAM, ONE);
-				tempRightElement = null;
-				}
+			}
 			}
 		}
 

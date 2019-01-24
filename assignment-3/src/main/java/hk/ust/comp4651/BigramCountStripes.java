@@ -2,6 +2,7 @@ package hk.ust.comp4651;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -52,6 +53,24 @@ public class BigramCountStripes extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here
 			 */
+			for (int i = 0; i < words.length; i++){
+				//skip empty words
+				if (words[i].length() == 0)
+					continue;
+				
+				KEY.set(words[i]);
+				STRIPE.clear();
+				// inner loop to find adjacent word
+				for (int j = i + 1; j < words.length; j++){
+					if (words[j].length() == 0)
+						continue;
+					else {
+						STRIPE.increment(words[j], 1);
+						context.write(KEY, STRIPE);
+						break;
+					}
+				}
+			}
 		}
 	}
 
@@ -75,13 +94,22 @@ public class BigramCountStripes extends Configured implements Tool {
 			 * stripes using the plus() method. Please refer to the
 			 * implementation of HashMapStringIntWritable for details.
 			 */
-
+			Iterator<HashMapStringIntWritable> iter = stripes.iterator();
+			while(iter.hasNext()){
+				SUM_STRIPES.plus(iter.next());
+			}
 			/*
 			 * The output must be a sequence of key-value pairs of <bigram,
 			 * count>, the same as that of the "pairs" approach
 			 */
-		}
+			for (String str : SUM_STRIPES.keySet()){
+				COUNT.set(SUM_STRIPES.get(str));
+				BIGRAM.set(key.toString(), str);
+				context.write(BIGRAM, COUNT);
+			}
+		}			
 	}
+	
 
 	/*
 	 * Combiner: aggregate all stripes
@@ -99,8 +127,14 @@ public class BigramCountStripes extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here
 			 */
+			Iterator<HashMapStringIntWritable> iter = stripes.iterator();
+			while(iter.hasNext())
+				SUM_STRIPES.plus(iter.next());  
+			
+			context.write(key, SUM_STRIPES);
+			SUM_STRIPES.clear();
+			}
 		}
-	}
 
 	/**
 	 * Creates an instance of this tool.
