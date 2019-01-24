@@ -1,6 +1,7 @@
 package hk.ust.comp4651;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
@@ -33,7 +34,7 @@ import org.apache.log4j.Logger;
  */
 public class BigramFrequencyPairs extends Configured implements Tool {
 	private static final Logger LOG = Logger.getLogger(BigramFrequencyPairs.class);
-
+	private static final IntWritable MARGINAL = new IntWritable();
 	/*
 	 * TODO: write your Mapper here
 	 */
@@ -53,6 +54,27 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here.
 			 */
+			for (int i = 0; i < words.length - 1; i++) {
+				// skip empty words
+				if (words[i].length() == 0)
+					continue;
+				
+				// loop to find the adjacent word
+				for (int j = i + 1; j < words.length - 1; j++) {
+					// skip empty words
+					if (words[j].length() == 0)
+						continue;
+					else {
+						BIGRAM.set(words[i], words[j]);
+						context.write(BIGRAM, ONE);
+						
+						// emit marginal count
+						BIGRAM.set(words[i], "");
+						context.write(BIGRAM, ONE);
+						break;
+					}
+				}
+			}
 		}
 	}
 
@@ -71,6 +93,19 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here.
 			 */
+			Iterator<IntWritable> iter = values.iterator();
+			VALUE.set(0);
+			
+			while(iter.hasNext())
+				VALUE.set(VALUE.get() + iter.next().get());
+			
+			if (key.getRightElement() == ""){
+				MARGINAL.set((int) VALUE.get());
+				context.write(key, VALUE);
+			} else {
+				VALUE.set(VALUE.get() / MARGINAL.get());
+				context.write(key, VALUE);
+			}
 		}
 	}
 	
@@ -84,6 +119,13 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here.
 			 */
+			Iterator<IntWritable> iter = values.iterator();
+			SUM.set(0);
+			
+			while (iter.hasNext())
+				SUM.set(SUM.get() + iter.next().get());
+
+			context.write(key, SUM);
 		}
 	}
 

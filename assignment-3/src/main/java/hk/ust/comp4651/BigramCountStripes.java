@@ -53,19 +53,19 @@ public class BigramCountStripes extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here
 			 */
-			for (int i = 0; i < words.length; i++){
+			for (int i = 0; i < words.length - 1; i++){
 				//skip empty words
 				if (words[i].length() == 0)
 					continue;
 				
-				KEY.set(words[i]);
-				STRIPE.clear();
 				// inner loop to find adjacent word
 				for (int j = i + 1; j < words.length; j++){
 					if (words[j].length() == 0)
 						continue;
 					else {
-						STRIPE.increment(words[j], 1);
+						STRIPE.clear();
+						STRIPE.increment(words[j]);
+						KEY.set(words[i]);
 						context.write(KEY, STRIPE);
 						break;
 					}
@@ -107,6 +107,7 @@ public class BigramCountStripes extends Configured implements Tool {
 				BIGRAM.set(key.toString(), str);
 				context.write(BIGRAM, COUNT);
 			}
+			SUM_STRIPES.clear();
 		}			
 	}
 	
@@ -128,6 +129,7 @@ public class BigramCountStripes extends Configured implements Tool {
 			 * TODO: Your implementation goes here
 			 */
 			Iterator<HashMapStringIntWritable> iter = stripes.iterator();
+			SUM_STRIPES.clear();
 			while(iter.hasNext())
 				SUM_STRIPES.plus(iter.next());  
 			

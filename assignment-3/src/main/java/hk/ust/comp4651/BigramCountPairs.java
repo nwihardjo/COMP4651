@@ -54,13 +54,13 @@ public class BigramCountPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here
 			 */
-			for (int i = 0; i < words.length; i++) {
+			for (int i = 0; i < words.length - 1; i++) {
 				// skip empty words
 				if (words[i].length() == 0)
 					continue;
 				
 				// loop to find the adjacent word
-				for (int j = i + 1; j < words.length; j++) {
+				for (int j = i + 1; j < words.length - 1; j++) {
 					// skip empty words
 					if (words[j].length() == 0)
 						continue;
@@ -91,11 +91,11 @@ public class BigramCountPairs extends Configured implements Tool {
 			 * sequence of key-value pairs of <bigram, count>
 			 */
 			Iterator<IntWritable> iter = values.iterator();
-			int sum = 0;
-			while (iter.hasNext()) 
-				sum += iter.next().get();
+			SUM.set(0);
 			
-			SUM.set(sum);
+			while (iter.hasNext()) 
+				SUM.set(SUM.get()+ iter.next().get());
+			
 			context.write(key, SUM);
 			}
 	}
