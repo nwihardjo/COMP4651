@@ -60,7 +60,7 @@ public class BigramCountPairs extends Configured implements Tool {
 					continue;
 				
 				// loop to find the adjacent word
-				for (int j = i + 1; j < words.length - 1; j++) {
+				for (int j = i + 1; j < words.length; j++) {
 					// skip empty words
 					if (words[j].length() == 0)
 						continue;

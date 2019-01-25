@@ -1,6 +1,7 @@
 package hk.ust.comp4651;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -34,7 +35,8 @@ import org.apache.log4j.Logger;
 public class BigramFrequencyStripes extends Configured implements Tool {
 	private static final Logger LOG = Logger
 			.getLogger(BigramFrequencyStripes.class);
-
+	private static final IntWritable MARGINAL = new IntWritable();
+	
 	/*
 	 * Mapper: emits <word, stripe> where stripe is a hash map
 	 */
@@ -54,6 +56,21 @@ public class BigramFrequencyStripes extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here.
 			 */
+			for (int i = 0; i < words.length - 1; i++){
+				// skip empty words
+				if (words[i].length() == 0)
+					continue;
+				
+				STRIPE.clear();
+				
+				STRIPE.increment(words[i+1]);
+				KEY.set(words[i]);
+				context.write(KEY, STRIPE);
+				// emit extra content for marginal count
+				STRIPE.clear();
+				STRIPE.increment("");
+				context.write(KEY, STRIPE);
+			}
 		}
 	}
 
@@ -75,6 +92,26 @@ public class BigramFrequencyStripes extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here
 			 */
+			
+			Iterator<HashMapStringIntWritable> iter = stripes.iterator();
+			
+			while(iter.hasNext())
+				SUM_STRIPES.plus(iter.next());
+			
+			for (String str : SUM_STRIPES.keySet()){
+				BIGRAM.set(key.toString(), str);
+				
+				if (str.equals("")){
+					MARGINAL.set(SUM_STRIPES.get(str));
+					FREQ.set(MARGINAL.get());
+					context.write(BIGRAM, FREQ);
+				} else {					
+					FREQ.set(SUM_STRIPES.get(str) / MARGINAL.get());
+					context.write(BIGRAM, FREQ);
+				}
+			}
+			
+			SUM_STRIPES.clear();
 		}
 	}
 
@@ -94,6 +131,13 @@ public class BigramFrequencyStripes extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here
 			 */
+			Iterator<HashMapStringIntWritable> iter = stripes.iterator();
+			
+			while(iter.hasNext())
+				SUM_STRIPES.plus(iter.next());
+			
+			context.write(key, SUM_STRIPES);
+			SUM_STRIPES.clear();
 		}
 	}
 

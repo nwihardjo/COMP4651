@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
  */
 public class BigramFrequencyPairs extends Configured implements Tool {
 	private static final Logger LOG = Logger.getLogger(BigramFrequencyPairs.class);
-	private static final IntWritable MARGINAL = new IntWritable();
+	private static IntWritable MARGINAL = new IntWritable();
 	/*
 	 * TODO: write your Mapper here
 	 */
@@ -59,21 +59,11 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 				if (words[i].length() == 0)
 					continue;
 				
-				// loop to find the adjacent word
-				for (int j = i + 1; j < words.length - 1; j++) {
-					// skip empty words
-					if (words[j].length() == 0)
-						continue;
-					else {
-						BIGRAM.set(words[i], words[j]);
-						context.write(BIGRAM, ONE);
-						
-						// emit marginal count
-						BIGRAM.set(words[i], "");
-						context.write(BIGRAM, ONE);
-						break;
-					}
-				}
+				BIGRAM.set(words[i], words[i + 1]);
+				context.write(BIGRAM, ONE);
+				// emit marginal count
+				BIGRAM.set(words[i], "");
+				context.write(BIGRAM, ONE);
 			}
 		}
 	}
@@ -86,7 +76,7 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 
 		// Reuse objects.
 		private final static FloatWritable VALUE = new FloatWritable();
-
+		
 		@Override
 		public void reduce(PairOfStrings key, Iterable<IntWritable> values,
 				Context context) throws IOException, InterruptedException {
@@ -99,10 +89,12 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 			while(iter.hasNext())
 				VALUE.set(VALUE.get() + iter.next().get());
 			
-			if (key.getRightElement() == ""){
-				MARGINAL.set((int) VALUE.get());
+			if (key.getRightElement().toString().equals("")){
+				// set up marginal count for each word
+				MARGINAL.set((int) VALUE.get()); 
 				context.write(key, VALUE);
 			} else {
+				// count the frequency: # occurence / # marginal
 				VALUE.set(VALUE.get() / MARGINAL.get());
 				context.write(key, VALUE);
 			}
@@ -124,7 +116,7 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 			
 			while (iter.hasNext())
 				SUM.set(SUM.get() + iter.next().get());
-
+				
 			context.write(key, SUM);
 		}
 	}
