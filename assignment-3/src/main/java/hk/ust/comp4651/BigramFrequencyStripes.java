@@ -106,7 +106,7 @@ public class BigramFrequencyStripes extends Configured implements Tool {
 					FREQ.set(MARGINAL.get());
 					context.write(BIGRAM, FREQ);
 				} else {					
-					FREQ.set(SUM_STRIPES.get(str) / MARGINAL.get());
+					FREQ.set(SUM_STRIPES.get(str) / (float) MARGINAL.get());
 					context.write(BIGRAM, FREQ);
 				}
 			}
