@@ -15,7 +15,7 @@ Codes for HKUST COMP4651 Fall 2018: Cloud Computing and Big Data Systems
 [Assignmnet 5](https://github.com/nwihardjo/COMP4651-Cloud-Computing-and-Big-Data-Systems/blob/master/assignment-5/ml_pipeline.ipynb): Power Plant Machine Learning Pipeline Application with Apache Spark
 
 ## Additional
-[DataFrame Live Programming](https://github.com/nwihardjo/COMP4651-Cloud-Computing-and-Big-Data-Systems/tree/master/DataFrame-live): Spark's DataFrame Live Programming hands-on tutorial from Spark SF Meetup 2016
+[DataFrame Live Programming](https://github.com/nwihardjo/COMP4651-Cloud-Computing-and-Big-Data-Systems/blob/master/DataFrame-live/Fire%20Incidents%20Exploration%20-%20RunMe.ipynb): Spark's DataFrame Live Programming hands-on tutorial from Spark SF Meetup 2016
 
 [Spark Tutorial](https://github.com/nwihardjo/COMP4651-Cloud-Computing-and-Big-Data-Systems/blob/master/spark-tutorial/spark_tutorial.ipynb): Apache Spark tutorial heavily adapted from [Spark MOOC](https://github.com/spark-mooc/)
 
